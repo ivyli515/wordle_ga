@@ -1,0 +1,10 @@
+
+.row {
+    display: flex;
+}
+.row-0, .row-1, .row-2, .row-3, .row-4, .row-5{
+    border: 1px solid grey;
+    border-radius: 3pxs;
+    width: 2rem;
+    height: 2rem;
+}
