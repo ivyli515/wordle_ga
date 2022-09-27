@@ -2,6 +2,8 @@ import {generateWord, isGuessValid} from './wordle-words.js';
 
 // setup constants for the game
 const targetWord = generateWord();
+// const targetWord = 'PEACH';
+const targetLetters = targetWord.split("")
 console.log(targetWord);
 let message = document.getElementById('message');
 let guessWord = document.getElementById('guessWord');
@@ -14,7 +16,6 @@ for (let keyElement of keys) {
         keyElement.setAttribute('id', keyElement.textContent);
     }
 }
-// const targetWord = 'PEACH';
 
 const guesses = [
     "",
@@ -31,12 +32,13 @@ function renderBoard(currentGuesses) {
     for (let rowNum=0; rowNum<6; rowNum++) {
         const currentGuess = currentGuesses[rowNum].toUpperCase();
         const letters = currentGuess.split(""); 
-        const targetLetters = targetWord.split("")
+        
         const targetObj = Object.assign({}, targetLetters)
 
         const guessObj = Object.assign({}, letters)
         const columnsDiv = rows[rowNum]
     // iterate over column / letters
+    // TODO: clean up messy code
         Object.entries(guessObj).forEach( entry=> {
             const [colNum, letter] = entry
             columnsDiv.children[colNum].innerText = letter
@@ -136,7 +138,7 @@ function handleClick() {
 // Keyboard
 
 
-function generateGuessWord() {
+function converKeyboardtoInput() {
     let keyboardGuess = ''
     for (let keyElement of keys) {
         let key = keyElement.textContent;
@@ -164,4 +166,33 @@ function generateGuessWord() {
 //     }
 // }
 
-generateGuessWord()
+converKeyboardtoInput()
+
+// Provide hint
+document.getElementById('hint').addEventListener('click', handleHint)
+function handleHint() {
+    let guessArr = []
+    let hints = []
+    for (let guess of guesses) {
+        if (guess!=='') {
+            guessArr.push(guess.split(''))
+        }
+    }
+    guessArr = guessArr.flat()
+
+    const set = new Set(guessArr);
+    const newArr = [...set];
+    for (let l of targetLetters) {
+        if (!newArr.includes(l)) {
+            hints.push(l)
+        }
+    }
+    if (hints.length!=0) {
+        const firstHint = hints[0];
+        document.getElementById(firstHint).style.border= "1px solid red";
+    } else {
+        message.innerText = 'You already have all the letters you need!';
+    }
+    // TODO: grey out hint button 
+    document.getElementById('hint').removeEventListener('click', handleHint)
+}
