@@ -12,6 +12,7 @@ body {
 }
 .row {
     display: flex;
+    flex-shrink: 1;
     justify-content: center;
     margin: 5px;
 
@@ -33,6 +34,18 @@ body {
     
 }
 
+.green, button.green {
+    background-color: #6BA964; 
+    border-color: #6BA964; 
+    color: white;
+}
+
+.yellow, button.yellow {
+    background: #C9B458; border-color: #C9B458; color: white;
+}
+.grey, button.grey {
+    background: #787C7E; border-color: #787C7E; color: white;
+}
 #guessWord {
     text-transform: uppercase;
 }
@@ -59,6 +72,7 @@ body {
 .keyboard {
     margin-top: 1rem;
 }
+
 .key {
     background: #D4D6DA;
     border: none;
@@ -69,9 +83,21 @@ body {
     line-height: 3.5rem;
     font-weight: 400;
 }
+.key:hover {
+    background: #C6A1CF;
+}
 #enter {
     width: 5rem;
 }
 #backspace {
     width: 4rem;
+}
+.messageFilled {
+    background-color: #C6A1CF;
+    color: white;
+}
+.inputAnimation {
+    animation-name: flip;
+    animation-duration: 1s;
+    animation-delay: 2s;
 }

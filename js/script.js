@@ -1,17 +1,15 @@
-import {generateWord, isGuessValid} from './wordle-words.js';
+import {generateWord, isGuessValid} from './wordlewords.js';
 
 // setup constants for the game
-// const targetWord = generateWord();
-const targetWord = 'PEACH';
+const targetWord = generateWord();
+// const targetWord = 'PEACH';
 const targetLetters = targetWord.split("")
 console.log(targetWord);
 let message = document.getElementById('message');
-let guessWord = document.getElementById('guessWord');
+
 const rows = document.getElementsByClassName("row");
 let keyboardGuess = [];
 
-
-// guessWord.value.toUpperCase();
 let keys = document.getElementsByClassName('key');
 for (let keyElement of keys) {
     if (keyElement.textContent != 'Enter' && keyElement.textContent != 'Backspace') {
@@ -21,9 +19,9 @@ for (let keyElement of keys) {
 }
 
 const guesses = [
-    "APPLE",
-    "TRAIN",
-    "GRAPE",
+    "",
+    "",
+    "",
     "",
     "",
     "",
@@ -53,13 +51,16 @@ function renderBoard(currentGuesses) {
         Object.entries(guessObj).forEach( entry=> {
             const [colNum, letter] = entry
             columnsDiv.children[colNum].innerText = letter
-            const boardStyle = 'background: #6BA964; border-color: #6BA964; color: white;'
+            // const boardStyle = 'background: #6BA964; border-color: #6BA964; color: white;'
 
             if (letter === targetObj[colNum]) {
-                columnsDiv.children[colNum].style=boardStyle;
+                columnsDiv.children[colNum].classList.add('green');
+                let keyId = targetObj[colNum]         
+                const greenKey = document.getElementById(keyId)
+                // greenKey.style = 'background: #6BA964; color: white;'
+                greenKey.classList = greenKey.classList[0];
+                greenKey.classList.add('green');
                 
-                let keyId = targetObj[colNum]
-                document.getElementById(keyId).style = boardStyle;
                 delete targetObj[colNum]
                 delete guessObj[colNum]
             }
@@ -67,28 +68,29 @@ function renderBoard(currentGuesses) {
         Object.entries(guessObj).forEach( entry=> {
             const [colNum, letter] = entry
             columnsDiv.children[colNum].innerText = letter
-            const boardStyleYellow = 'background: #C9B458; border-color: #C9B458; color: white;'
-            const boardStyleGrey = 'background: #787C7E; border-color: #787C7E; color: white;'
+
             if (letter !== targetObj[colNum] && Object.values(targetObj).includes(letter)) {
-                columnsDiv.children[colNum].style = boardStyleYellow
+                columnsDiv.children[colNum].classList.add('yellow');
                
                 let keyId = letter;
                 const yellowKey = document.getElementById(keyId);
                 if (!yellowKey.style.background) {
-                    yellowKey.style = boardStyleYellow
+                    yellowKey.classList = yellowKey.classList[0];
+                    yellowKey.classList.add('yellow')
                 }
                 const col = getKeyByValue(targetObj, letter);
                 delete targetObj[col]
                 delete guessObj[colNum]
             }
             else {
-                columnsDiv.children[colNum].style = boardStyleGrey;
+                columnsDiv.children[colNum].classList.add('grey');
                 
                 let keyId = columnsDiv.children[colNum].textContent
                 
                 const greyKey = document.getElementById(keyId);
                 if (!greyKey.style.background) {
-                    greyKey.style = boardStyleGrey
+                    greyKey.classList = greyKey.classList[0]
+                    greyKey.classList.add('grey')
                 }
             }
         })
@@ -105,8 +107,9 @@ renderBoard(guesses)
 
 function decideGameState() {
     if (guesses.includes(targetWord)) {
-        message.innerText = "Congratulations! You won."
-        fillMessageStyle()
+        message.innerText = "Congratulations! You won :)"
+        message.className = 'messageFilled';
+        // fillMessageStyle()
     }
     else if (!guesses.includes('')) {
         message.innerText = `You have exhausted all your guesses! The word you are looking for is ${targetWord}`
@@ -137,10 +140,11 @@ function handleHint() {
     }
     if (hints.length!=0) {
         const firstHint = hints[0];
-        document.getElementById(firstHint).style.border= "1px solid red";
+        document.getElementById(firstHint).style.border= "2px solid red";
     } else {
         message.innerText = 'You already have all the letters you need!';
-        fillMessageStyle()
+        message.className = 'messageFilled';
+        // fillMessageStyle()
     }
     document.getElementById('hint').disabled = true;
 }
@@ -149,19 +153,9 @@ function handleHint() {
 function useVirtualKeyboard() {
 
     document.addEventListener('keydown', (event)=> {    
-        updateEnter(event.code)
-        for (let col in boardRow) {
-            if (updateBackspace(event.code)) {
-                break;
-            }
-            else if (boardRow[col].innerText === "" && event.key.length ===1){
-            
-                boardRow[col].innerText = event.key.toUpperCase();
-                keyboardGuess.push(event.key.toUpperCase());
-                break;
-            }
-        }
-        updteRowIndex()
+        updateEnter(event.key)
+        /
+        updateKeyboardInput(event.key);
         
     });
 }
@@ -178,7 +172,8 @@ function handleEnter(entry, row) {
     }
     else if (!isGuessValid(yourGuess)) {
         message.innerText = 'Please enter a valid word!'
-        fillMessageStyle()
+        message.className = 'messageFilled';
+        // fillMessageStyle()
         for (let c of row) {
             c.innerText='';
         }
@@ -197,56 +192,47 @@ function keyboardInput() {
     // register event listener for each of the keys on the keyboard
     for (let keyElement of keys) {
         let key = keyElement.textContent;
-        
+        // const inputAnimation = 'animation: flip 1s'
+
         // register event listeners for mouse input
         keyElement.addEventListener('click', function () {
             updateEnter(key);
+            updateKeyboardInput(key);
+
             
-            for (let col of boardRow) {
-                if (updateBackspace(key)) {
-                    break;
-                }
-                
-                 if (col.innerText==='') {
-                    col.innerText = key
-                    keyboardGuess.push(key);
-                    break;
-                }
-                
-            }
-            updteRowIndex()
         })
     // }
 }
 }
 keyboardInput()
 
+
+
+function updateKeyboardInput(input) {
+    const regex = /^[A-Za-z]$/
+    for (let col of boardRow) {
+        if (input=='Backspace' && keyboardGuess.length !==0) {
+            // console.log(boardRow[keyboardGuess.length-1])
+            boardRow[keyboardGuess.length-1].innerText = '';
+            keyboardGuess.pop();
+            break;
+        }
+        else if (col.innerText==='' && regex.test(input)) {
+            input = input.toUpperCase();
+            col.innerText = input;
+            keyboardGuess.push(input);
+            break;
+        }
+    }
+    updteRowIndex()
+}
 function updateEnter(input) {
     if (input=="Enter" && keyboardGuess.length == 5) {
         handleEnter(keyboardGuess, boardRow)
     }
 }
-function updateBackspace(input) {
-    if (input=='Backspace') {
-        console.log(boardRow[keyboardGuess.length-1])
-        boardRow[keyboardGuess.length-1].innerText = '';
-        keyboardGuess.pop();
-        return true;
-        
-    }
-}
-function fillMessageStyle() {
+
+// function fillMessageStyle() {
     
-    return document.getElementById('message').style.background = '#D4D6DA';
-}
-
-
-// for (let i=0; i<2; i++) {
-//     if (call_some_function(true)) {
-//         break
-//     }
-// }
-
-// function call_some_function(some_bool) {
-//     return some_bool
+//     return document.getElementById('message').style.background = '#D4D6DA';
 // }
