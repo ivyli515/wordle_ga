@@ -1,36 +1,47 @@
 import {generateWord, isGuessValid} from './wordle-words.js';
 
 // setup constants for the game
-const targetWord = generateWord();
-// const targetWord = 'PEACH';
+// const targetWord = generateWord();
+const targetWord = 'PEACH';
 const targetLetters = targetWord.split("")
 console.log(targetWord);
 let message = document.getElementById('message');
 let guessWord = document.getElementById('guessWord');
+const rows = document.getElementsByClassName("row");
+let keyboardGuess = [];
+
 
 // guessWord.value.toUpperCase();
 let keys = document.getElementsByClassName('key');
 for (let keyElement of keys) {
-    if (keyElement.textContent != 'Enter' && keyElement.textContent != 'Del') {
+    if (keyElement.textContent != 'Enter' && keyElement.textContent != 'Backspace') {
         keyElement.textContent = keyElement.textContent.toUpperCase();
         keyElement.setAttribute('id', keyElement.textContent);
     }
 }
 
 const guesses = [
-    "",
-    "",
-    "",
+    "APPLE",
+    "TRAIN",
+    "GRAPE",
     "",
     "",
     "",
 ]
+let rowIdx = guesses.indexOf(''); // initial value
+let boardRow = document.getElementsByClassName(`row-${rowIdx}`)
+
+function updteRowIndex() {
+    // called whenever a successful submit happens
+    rowIdx = guesses.indexOf('')
+    boardRow = document.getElementsByClassName(`row-${rowIdx}`)
+}
 
 function renderBoard(currentGuesses) {
-    const rows = document.getElementsByClassName("row");
+    
     // iterate over the 6 guesses / rows
     for (let rowNum=0; rowNum<6; rowNum++) {
-        const currentGuess = currentGuesses[rowNum].toUpperCase();
+        const currentGuess = currentGuesses[rowNum];
         const letters = currentGuess.split(""); 
         
         const targetObj = Object.assign({}, targetLetters)
@@ -42,16 +53,13 @@ function renderBoard(currentGuesses) {
         Object.entries(guessObj).forEach( entry=> {
             const [colNum, letter] = entry
             columnsDiv.children[colNum].innerText = letter
+            const boardStyle = 'background: #6BA964; border-color: #6BA964; color: white;'
 
             if (letter === targetObj[colNum]) {
-                columnsDiv.children[colNum].style.background = 'green'
-                // for (let keyElement of keys) {
-                //     if (keyElement.textContent.toLocaleUpperCase() === targetObj[colNum]) {                     
-                //         keyElement.style.background = 'green'
-                //     }
-                // }
+                columnsDiv.children[colNum].style=boardStyle;
+                
                 let keyId = targetObj[colNum]
-                document.getElementById(keyId).style.background = 'green';
+                document.getElementById(keyId).style = boardStyle;
                 delete targetObj[colNum]
                 delete guessObj[colNum]
             }
@@ -59,35 +67,28 @@ function renderBoard(currentGuesses) {
         Object.entries(guessObj).forEach( entry=> {
             const [colNum, letter] = entry
             columnsDiv.children[colNum].innerText = letter
-
+            const boardStyleYellow = 'background: #C9B458; border-color: #C9B458; color: white;'
+            const boardStyleGrey = 'background: #787C7E; border-color: #787C7E; color: white;'
             if (letter !== targetObj[colNum] && Object.values(targetObj).includes(letter)) {
-                columnsDiv.children[colNum].style.background = 'yellow'
-                // for (let keyElement of keys) {
-                //     if (keyElement.textContent.toLocaleUpperCase() === letter && !keyElement.style.background) {                     
-                //         keyElement.style.background = 'yellow'
-                //     }
-                // }
+                columnsDiv.children[colNum].style = boardStyleYellow
+               
                 let keyId = letter;
                 const yellowKey = document.getElementById(keyId);
                 if (!yellowKey.style.background) {
-                    yellowKey.style.background = 'yellow'
+                    yellowKey.style = boardStyleYellow
                 }
                 const col = getKeyByValue(targetObj, letter);
                 delete targetObj[col]
                 delete guessObj[colNum]
             }
             else {
-                columnsDiv.children[colNum].style.background = 'grey';
-                // for (let keyElement of keys) {
-                //     if (keyElement.textContent.toLocaleUpperCase() === columnsDiv.children[colNum].textContent 
-                //         && !keyElement.style.background) {                     
-                //         keyElement.style.background = 'grey'
-                //     }
-                // }
+                columnsDiv.children[colNum].style = boardStyleGrey;
+                
                 let keyId = columnsDiv.children[colNum].textContent
+                
                 const greyKey = document.getElementById(keyId);
                 if (!greyKey.style.background) {
-                    greyKey.style.background = 'grey'
+                    greyKey.style = boardStyleGrey
                 }
             }
         })
@@ -105,68 +106,15 @@ renderBoard(guesses)
 function decideGameState() {
     if (guesses.includes(targetWord)) {
         message.innerText = "Congratulations! You won."
+        fillMessageStyle()
     }
     else if (!guesses.includes('')) {
         message.innerText = `You have exhausted all your guesses! The word you are looking for is ${targetWord}`
-        // document.getElementById('guessWord').value = ''
+        fillMessageStyle()
     }
-    
 
 }
-// function remainingGuesses(guessList) {
-//     return guessList.filter(it => it === "").length
-// }
 
-document.getElementById('submitGuess').addEventListener('click', handleClick);
-function handleClick() {
-    // console.log(guessWord.textContent);
-    message.innerText = ''
-    const yourGuess = guessWord.value.toUpperCase();
-    if (guesses.includes('') && isGuessValid(yourGuess)) {
-        const idx = guesses.indexOf('');
-        guesses[idx] = yourGuess;
-        renderBoard(guesses)
-        guessWord.value = '';
-    }
-    else if (!isGuessValid(yourGuess)) {
-        message.innerText = 'Please enter a valid word!'
-        guessWord.value = ''
-    }
-    decideGameState()
-}
-    
-// Keyboard
-
-
-function converKeyboardtoInput() {
-    let keyboardGuess = ''
-    for (let keyElement of keys) {
-        let key = keyElement.textContent;
-        keyElement.addEventListener('click', function () {
-            switch(key) {
-                case "Del":
-                    guessWord.value = guessWord.value.slice(0, guessWord.value.length-1);
-                    break;
-                case "Enter":
-                    handleClick();
-                    keyboardGuess = '';
-                    break;
-                default: 
-                    keyboardGuess = keyboardGuess.concat(key);
-                    guessWord.value = keyboardGuess;
-
-            }
-        })
-    }
-}
-
-// function renderKeyboard() {
-//     for (let keyElement of keys) {
-//         for ()
-//     }
-// }
-
-converKeyboardtoInput()
 
 // Provide hint
 document.getElementById('hint').addEventListener('click', handleHint)
@@ -192,7 +140,113 @@ function handleHint() {
         document.getElementById(firstHint).style.border= "1px solid red";
     } else {
         message.innerText = 'You already have all the letters you need!';
+        fillMessageStyle()
     }
-    // TODO: grey out hint button 
-    document.getElementById('hint').removeEventListener('click', handleHint)
+    document.getElementById('hint').disabled = true;
 }
+
+
+function useVirtualKeyboard() {
+
+    document.addEventListener('keydown', (event)=> {    
+        updateEnter(event.code)
+        for (let col in boardRow) {
+            if (updateBackspace(event.code)) {
+                break;
+            }
+            else if (boardRow[col].innerText === "" && event.key.length ===1){
+            
+                boardRow[col].innerText = event.key.toUpperCase();
+                keyboardGuess.push(event.key.toUpperCase());
+                break;
+            }
+        }
+        updteRowIndex()
+        
+    });
+}
+useVirtualKeyboard();
+
+function handleEnter(entry, row) {
+    message.innerText = ''
+    const yourGuess = entry.join('');
+    if (guesses.includes('') && isGuessValid(yourGuess)) {
+        const idx = guesses.indexOf('');
+        guesses[idx] = yourGuess;
+        renderBoard(guesses)
+        if (rowIdx<guesses.length) {rowIdx=rowIdx+1}
+    }
+    else if (!isGuessValid(yourGuess)) {
+        message.innerText = 'Please enter a valid word!'
+        fillMessageStyle()
+        for (let c of row) {
+            c.innerText='';
+        }
+    }
+    keyboardGuess=[]
+    
+    decideGameState()
+    
+    
+}
+
+
+function keyboardInput() {
+   
+    
+    // register event listener for each of the keys on the keyboard
+    for (let keyElement of keys) {
+        let key = keyElement.textContent;
+        
+        // register event listeners for mouse input
+        keyElement.addEventListener('click', function () {
+            updateEnter(key);
+            
+            for (let col of boardRow) {
+                if (updateBackspace(key)) {
+                    break;
+                }
+                
+                 if (col.innerText==='') {
+                    col.innerText = key
+                    keyboardGuess.push(key);
+                    break;
+                }
+                
+            }
+            updteRowIndex()
+        })
+    // }
+}
+}
+keyboardInput()
+
+function updateEnter(input) {
+    if (input=="Enter" && keyboardGuess.length == 5) {
+        handleEnter(keyboardGuess, boardRow)
+    }
+}
+function updateBackspace(input) {
+    if (input=='Backspace') {
+        console.log(boardRow[keyboardGuess.length-1])
+        boardRow[keyboardGuess.length-1].innerText = '';
+        keyboardGuess.pop();
+        return true;
+        
+    }
+}
+function fillMessageStyle() {
+    
+    return document.getElementById('message').style.background = '#D4D6DA';
+}
+
+
+// for (let i=0; i<2; i++) {
+//     if (call_some_function(true)) {
+//         break
+//     }
+// }
+
+// function call_some_function(some_bool) {
+//     return some_bool
+// }
