@@ -19,7 +19,6 @@ body {
 }
 .row > div {
     margin: 3px;
-    animation: waviy 1s;
 }
 .row-0, .row-1, .row-2, .row-3, .row-4, .row-5{
     border: 3px solid #D4D6DA;
@@ -34,16 +33,16 @@ body {
     
 }
 
-.green, button.green {
+div.green, button.green {
     background-color: #6BA964; 
     border-color: #6BA964; 
     color: white;
 }
 
-.yellow, button.yellow {
+div.yellow, button.yellow {
     background: #C9B458; border-color: #C9B458; color: white;
 }
-.grey, button.grey {
+div.grey, button.grey {
     background: #787C7E; border-color: #787C7E; color: white;
 }
 #guessWord {
@@ -96,8 +95,6 @@ body {
     background-color: #C6A1CF;
     color: white;
 }
-.inputAnimation {
-    animation-name: flip;
-    animation-duration: 1s;
-    animation-delay: 2s;
+.filled {
+    border: 3px solid black
 }

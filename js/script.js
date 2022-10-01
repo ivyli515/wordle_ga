@@ -2,7 +2,8 @@ import {generateWord, isGuessValid} from './wordlewords.js';
 
 // setup constants for the game
 const targetWord = generateWord();
-// const targetWord = 'PEACH';
+// const targetWord = 'CREPE'
+// const targetWord = 'GRAPE';
 const targetLetters = targetWord.split("")
 console.log(targetWord);
 let message = document.getElementById('message');
@@ -11,13 +12,14 @@ const rows = document.getElementsByClassName("row");
 let keyboardGuess = [];
 
 let keys = document.getElementsByClassName('key');
+// make all keys upper case
 for (let keyElement of keys) {
     if (keyElement.textContent != 'Enter' && keyElement.textContent != 'Backspace') {
         keyElement.textContent = keyElement.textContent.toUpperCase();
         keyElement.setAttribute('id', keyElement.textContent);
     }
 }
-
+// set up array for 6 guesses
 const guesses = [
     "",
     "",
@@ -37,7 +39,7 @@ function updteRowIndex() {
 
 function renderBoard(currentGuesses) {
     
-    // iterate over the 6 guesses / rows
+// iterate over the 6 guesses / rows
     for (let rowNum=0; rowNum<6; rowNum++) {
         const currentGuess = currentGuesses[rowNum];
         const letters = currentGuess.split(""); 
@@ -46,18 +48,17 @@ function renderBoard(currentGuesses) {
 
         const guessObj = Object.assign({}, letters)
         const columnsDiv = rows[rowNum]
-    // iterate over column / letters
+// iterate over column / letters
     // TODO: clean up messy code
         Object.entries(guessObj).forEach( entry=> {
             const [colNum, letter] = entry
             columnsDiv.children[colNum].innerText = letter
-            // const boardStyle = 'background: #6BA964; border-color: #6BA964; color: white;'
 
             if (letter === targetObj[colNum]) {
                 columnsDiv.children[colNum].classList.add('green');
                 let keyId = targetObj[colNum]         
                 const greenKey = document.getElementById(keyId)
-                // greenKey.style = 'background: #6BA964; color: white;'
+
                 greenKey.classList = greenKey.classList[0];
                 greenKey.classList.add('green');
                 
@@ -74,8 +75,10 @@ function renderBoard(currentGuesses) {
                
                 let keyId = letter;
                 const yellowKey = document.getElementById(keyId);
-                if (!yellowKey.style.background) {
-                    yellowKey.classList = yellowKey.classList[0];
+                
+                if (yellowKey.classList.length ==1) {
+                    console.log(yellowKey.style.background)
+
                     yellowKey.classList.add('yellow')
                 }
                 const col = getKeyByValue(targetObj, letter);
@@ -88,8 +91,8 @@ function renderBoard(currentGuesses) {
                 let keyId = columnsDiv.children[colNum].textContent
                 
                 const greyKey = document.getElementById(keyId);
-                if (!greyKey.style.background) {
-                    greyKey.classList = greyKey.classList[0]
+                if (greyKey.classList.length ==1) {
+                    // greyKey.classList = greyKey.classList[0]
                     greyKey.classList.add('grey')
                 }
             }
@@ -109,11 +112,11 @@ function decideGameState() {
     if (guesses.includes(targetWord)) {
         message.innerText = "Congratulations! You won :)"
         message.className = 'messageFilled';
-        // fillMessageStyle()
+        
     }
     else if (!guesses.includes('')) {
         message.innerText = `You have exhausted all your guesses! The word you are looking for is ${targetWord}`
-        fillMessageStyle()
+        message.className = 'messageFilled';
     }
 
 }
@@ -144,25 +147,15 @@ function handleHint() {
     } else {
         message.innerText = 'You already have all the letters you need!';
         message.className = 'messageFilled';
-        // fillMessageStyle()
     }
     document.getElementById('hint').disabled = true;
 }
 
 
-function useVirtualKeyboard() {
-
-    document.addEventListener('keydown', (event)=> {    
-        updateEnter(event.key)
-        /
-        updateKeyboardInput(event.key);
-        
-    });
-}
-useVirtualKeyboard();
 
 function handleEnter(entry, row) {
     message.innerText = ''
+    message.className = '';
     const yourGuess = entry.join('');
     if (guesses.includes('') && isGuessValid(yourGuess)) {
         const idx = guesses.indexOf('');
@@ -173,7 +166,6 @@ function handleEnter(entry, row) {
     else if (!isGuessValid(yourGuess)) {
         message.innerText = 'Please enter a valid word!'
         message.className = 'messageFilled';
-        // fillMessageStyle()
         for (let c of row) {
             c.innerText='';
         }
@@ -181,58 +173,53 @@ function handleEnter(entry, row) {
     keyboardGuess=[]
     
     decideGameState()
-    
-    
+      
 }
 
-
-function keyboardInput() {
-   
-    
+// keyboard input
+function keyboardInput() { 
     // register event listener for each of the keys on the keyboard
     for (let keyElement of keys) {
         let key = keyElement.textContent;
-        // const inputAnimation = 'animation: flip 1s'
-
-        // register event listeners for mouse input
+        
         keyElement.addEventListener('click', function () {
-            updateEnter(key);
-            updateKeyboardInput(key);
-
-            
+            updateKeyboardInput(key);            
         })
-    // }
-}
+        // }
+    }
 }
 keyboardInput()
 
+// keypress input
+function useVirtualKeyboard() {
+// register event listener for key press events
+    document.addEventListener('keydown', (event)=> {    
+        updateKeyboardInput(event.key); 
+    });
+}
+useVirtualKeyboard();
 
-
+// function handling keyboard events
 function updateKeyboardInput(input) {
     const regex = /^[A-Za-z]$/
     for (let col of boardRow) {
+        if (input=="Enter" && keyboardGuess.length == 5) {
+            handleEnter(keyboardGuess, boardRow)
+        }
         if (input=='Backspace' && keyboardGuess.length !==0) {
             // console.log(boardRow[keyboardGuess.length-1])
             boardRow[keyboardGuess.length-1].innerText = '';
+            boardRow[keyboardGuess.length-1].classList.remove('filled');
             keyboardGuess.pop();
             break;
         }
         else if (col.innerText==='' && regex.test(input)) {
             input = input.toUpperCase();
             col.innerText = input;
+            col.classList.add('filled');
             keyboardGuess.push(input);
             break;
         }
     }
     updteRowIndex()
 }
-function updateEnter(input) {
-    if (input=="Enter" && keyboardGuess.length == 5) {
-        handleEnter(keyboardGuess, boardRow)
-    }
-}
-
-// function fillMessageStyle() {
-    
-//     return document.getElementById('message').style.background = '#D4D6DA';
-// }
