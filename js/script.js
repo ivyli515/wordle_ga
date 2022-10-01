@@ -10,7 +10,6 @@ let message = document.getElementById('message');
 
 const rows = document.getElementsByClassName("row");
 let keyboardGuess = [];
-
 let keys = document.getElementsByClassName('key');
 // make all keys upper case
 for (let keyElement of keys) {
@@ -31,14 +30,15 @@ const guesses = [
 let rowIdx = guesses.indexOf(''); // initial value
 let boardRow = document.getElementsByClassName(`row-${rowIdx}`)
 
+// function for the game to move onto the next row
 function updteRowIndex() {
     // called whenever a successful submit happens
     rowIdx = guesses.indexOf('')
     boardRow = document.getElementsByClassName(`row-${rowIdx}`)
 }
 
-function renderBoard(currentGuesses) {
-    
+
+function renderBoard(currentGuesses) {    
 // iterate over the 6 guesses / rows
     for (let rowNum=0; rowNum<6; rowNum++) {
         const currentGuess = currentGuesses[rowNum];
@@ -108,6 +108,7 @@ function getKeyByValue(object, value) {
 // Initial state of the game 
 renderBoard(guesses)
 
+// decide winning or losing for the game
 function decideGameState() {
     if (guesses.includes(targetWord)) {
         message.innerText = "Congratulations! You won :)"
@@ -123,7 +124,9 @@ function decideGameState() {
 
 
 // Provide hint
-document.getElementById('hint').addEventListener('click', handleHint)
+function provideHint() {
+    document.getElementById('hint').addEventListener('click', handleHint)
+}
 function handleHint() {
     let guessArr = []
     let hints = []
@@ -150,7 +153,7 @@ function handleHint() {
     }
     document.getElementById('hint').disabled = true;
 }
-
+provideHint()
 
 
 function handleEnter(entry, row) {
@@ -168,10 +171,10 @@ function handleEnter(entry, row) {
         message.className = 'messageFilled';
         for (let c of row) {
             c.innerText='';
+            c.classList.remove('filled');
         }
     }
     keyboardGuess=[]
-    
     decideGameState()
       
 }
@@ -207,7 +210,7 @@ function updateKeyboardInput(input) {
             handleEnter(keyboardGuess, boardRow)
         }
         if (input=='Backspace' && keyboardGuess.length !==0) {
-            // console.log(boardRow[keyboardGuess.length-1])
+            
             boardRow[keyboardGuess.length-1].innerText = '';
             boardRow[keyboardGuess.length-1].classList.remove('filled');
             keyboardGuess.pop();

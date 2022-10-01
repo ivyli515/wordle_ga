@@ -12,11 +12,12 @@ A hint button is added to the game for anyone who's as bad at this as me. One hi
 ## Logic behind comparing the guess word and target word
 
 Turning guess word and target word into a set of 5 individual letters
-i.e. guess ={
+i.e. guess =
+{
 0: 'C',
 1: 'R',
 2: 'E',
 3: 'P',
 4: 'E'
 }
-check for exact match first, the matching key and value pair will then be deleted from the set. s
+check for exact match first, the matching key and value pair will then be deleted from the set.
